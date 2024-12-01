@@ -15,6 +15,15 @@ for line in lines {
     rightcolumn.append(numbers[1])    
 }
 
+// alternative implementation of regrouping the columns using the reduce function
+// let (leftcolumn, rightcolumn) = lines.reduce(into: ([Int](), [Int]())) { 
+//     result, line in
+//     let numbers = line.split(separator: " ").map { Int($0)! }
+//     result.0.append(numbers[0])
+//     result.1.append(numbers[1])
+// }
+
+
 // solution 1
 let diffs = zip(leftcolumn.sorted(), rightcolumn.sorted()).map { abs($0 - $1) }
 print("Solution 1: \(diffs.reduce(0, +))")
