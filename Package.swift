@@ -6,6 +6,9 @@ import PackageDescription
 
 let package = Package(
     name: "aoc2024",
+    platforms: [
+        .macOS(.v13),        
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -19,6 +22,7 @@ let package = Package(
             path: "Sources/Day02"),
         .executableTarget(
             name: "Day03",
-            path: "Sources/Day03"),
+            path: "Sources/Day03", swiftSettings: [.enableUpcomingFeature("BareSlashRegexLiterals")]),            
     ]
+    
 )
