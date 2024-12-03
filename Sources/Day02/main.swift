@@ -26,15 +26,11 @@ let part2 = lines.reduce(0) { count, line in
 }
 
 func tryRemovingOne(_ numbers: [Int]) -> Bool {
-    for i in numbers.indices {
+    return numbers.indices.contains { i in
         var tempNumbers = numbers
         tempNumbers.remove(at: i)
-
-        if(isSafe(tempNumbers)) { 
-            return true 
-        }        
+        return isSafe(tempNumbers)
     }
-    return false
 }
 
 print("Part 2: \(part2)")
