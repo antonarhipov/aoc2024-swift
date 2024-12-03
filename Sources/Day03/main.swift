@@ -44,14 +44,10 @@ func part2(_ input: String) -> Int {
     var execute = true
     for substring in substrings {
         if substring == "don't()" {
-            execute = false
-            continue
+            execute = false            
         } else if substring == "do()" {
-            execute = true
-            continue
-        } 
-        
-        if (execute) {
+            execute = true            
+        } else if execute {
             let numbers = extractNumbers(String(substring))
             total += numbers[0] * numbers[1]
         }        
