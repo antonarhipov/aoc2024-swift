@@ -5,13 +5,15 @@ map() takes a value out of a container, applies a function to it, then puts the 
 compactMap() is a specialized form of map(). compactMap() applies a compacting step once the map() operation has been completed: all optionals get unwrapped, and any that contained nil get discarded.
 
 
-2. !!!!! No sliding window function in the stdlib is painful!
+2. !!!!! No sliding window function in the stdlib is painful! 
 
     let windowSize = 2
     let diffs = (0..<(numbers.count - windowSize + 1)).map { i in
         let window = Array(numbers[i..<i + windowSize])
         return window[0] - window[1]
     }
+
+    Update: see #5 - it's part of the Algorithms package
 
 3. allSatisfy
 
@@ -33,3 +35,7 @@ extension Array {
     }
 }
 ```
+
+5. [Swift Algorithms package](https://github.com/apple/swift-algorithms/)
+
+[Learned from the tweet by SwiftLang](https://x.com/SwiftLang/status/1863819687186116655)
