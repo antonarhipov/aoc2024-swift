@@ -22,3 +22,14 @@ let allHaveAtLeastFive = names.allSatisfy({ $0.count >= 5 })
 
 [https://developer.apple.com/documentation/swift/array/allsatisfy(_:)](https://developer.apple.com/documentation/swift/array/allsatisfy(_:)) 
 
+
+4. Extensions
+
+```
+extension Array {
+    func adjacentPairs() -> [(Element, Element)] {
+        guard count > 1 else { return [] }
+        return (0..<count-1).map { (self[$0], self[$0 + 1]) }
+    }
+}
+```
