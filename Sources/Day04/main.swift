@@ -1,7 +1,7 @@
 import Foundation
 
 let fileURL = URL(fileURLWithPath: "day04_input.txt")
-// let fileURL = URL(fileURLWithPath: "day04_test.txt")
+// let fileURL = URL(fileURLWithPath: "day04_test2.txt")
 let fileContents = try String(contentsOf: fileURL, encoding: .utf8)
 
 let horizontal = fileContents.split(separator: "\n").map { String($0) }
@@ -73,20 +73,6 @@ let allAntiDiagonalsTmp = (0..<rows).map { i in
 
 let allAntiDiagonals = allAntiDiagonalsTmp.filter { $0.count > 3 }
 
-print("----------------------")
-print("Horizontal: \(horizontal.count)")
-horizontal.forEach { print($0) }
-print("----------------------")
-print("Vertical: \(vertial.count)")
-vertial.forEach { print($0) }
-print("----------------------")
-print("Diagonals: \(allDiagonals.count)")
-allDiagonals.forEach { print($0) }
-print("----------------------")
-print("Anti Diagonals: \(allAntiDiagonals.count)")
-allAntiDiagonals.forEach { print($0) }
-print("----------------------")
-
 let xmas = "XMAS"
 
 let horizontalXmas = horizontal.countEntries(of: xmas)
@@ -95,16 +81,69 @@ let diagonalRightXmas = allDiagonals.countEntries(of: xmas)
 let diagonalLeftXmas = allAntiDiagonals.countEntries(of: xmas)
 
 let total = horizontalXmas + verticalXmas + diagonalRightXmas + diagonalLeftXmas
-print("Part 1:  \(total)")
+print("Part 1:  \(total)") // 18 (for test input)  2549 (with real input)
 
 extension [String] {
     func countEntries(of substring: String) -> Int {
         return map { line in
             let streightCount = line.ranges(of: substring).count
             let reverseCount = line.reversed().ranges(of: substring).count 
-            print("-> \(line) -> \(streightCount)")
-            print("<- \(String(line.reversed())) -> \(reverseCount)")        
             return streightCount + reverseCount
         }.reduce(0, +)
+    }
+}
+
+// Part 2: find crossings of 'MAX' in the matrix
+// The crossings are the intersections of the diagonal and anti-diagonal lines,
+// Find two MAS in the shape of an X as follows:
+// Example 1:
+// M.S
+// .A.
+// M.S
+// The number of crossings are: 1
+// The two 'MAS' words are always diagonal and intersect at letter 'A'
+// Example 2:
+// .M.S......
+// ..A..MSMS.
+// .M.S.MAA..
+// ..A.ASMSM.
+// .M.S.M....
+// ..........
+// S.S.S.S.S.
+// .A.A.A.A..
+// M.M.M.M.M.
+// ..........
+// The number of crossings are: 9
+
+
+let crossings = matrix.countCrossings(of: "MAS")
+print("Part 2:  \(crossings)") 
+
+extension Array where Element == Array<Character> {
+    func countCrossings(of substring: String) -> Int {
+        let rows = self.count
+        let columns = self[0].count
+        var count = 0
+        for i in 0..<rows {
+            for j in 0..<columns {
+                if self[i][j] == "A" {            
+                    if i + 1 < rows && j + 1 < columns && i - 1 >= 0 && j - 1 >= 0 {
+                        let topLeft = self[i-1][j-1]
+                        let bottomRight = self[i+1][j+1]
+                        let topRight = self[i-1][j+1]
+                        let bottomLeft = self[i+1][j-1]
+
+                        if (   topLeft == "S" && bottomRight == "M" && topRight == "S" && bottomLeft == "M"  ||
+                               topLeft == "S" && bottomRight == "M" && topRight == "M" && bottomLeft == "S"  ||
+
+                               topLeft == "M" && bottomRight == "S" && topRight == "M" && bottomLeft == "S"  ||                               
+                               topLeft == "M" && bottomRight == "S" && topRight == "S" && bottomLeft == "M"  ){
+                            count += 1
+                        }
+                    } 
+                }
+            }
+        }
+        return count
     }
 }
