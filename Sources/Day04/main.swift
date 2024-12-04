@@ -175,10 +175,10 @@ extension Array where Element == [Character] {
                 guard self[i][j] == "X" else { return nil }
                 return directions.reduce(0) { acc, dir in
                     let xmasString = (0..<4).compactMap { k -> Character? in
-                    let newRow = i + k * dir.dy
-                    let newCol = j + k * dir.dx
-                    guard newRow >= 0, newRow < rows, newCol >= 0, newCol < columns else { return nil }
-                    return self[newRow][newCol]
+                        let newRow = i + k * dir.dy
+                        let newCol = j + k * dir.dx
+                        guard newRow >= 0, newRow < rows, newCol >= 0, newCol < columns else { return nil }
+                        return self[newRow][newCol]
                     }
                     return acc + (String(xmasString) == xmas ? 1 : 0)
                 }
