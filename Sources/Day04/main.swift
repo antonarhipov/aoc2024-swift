@@ -149,7 +149,7 @@ extension Array where Element == [Character] {
     }
 }
 
-print("Part 1 (alternative) \(matrix.findXmas())") // 9 for test data, 2003 for real data
+print("Part 1 (alternative) \(matrix.findXmas())") // 9 for test data, 2549 for real data
 
 /// Alternative implemetation for Part 1
 extension Array where Element == [Character] {
