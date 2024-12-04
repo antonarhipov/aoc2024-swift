@@ -31,6 +31,9 @@ let package = Package(
             name: "Day03",            
             path: "Sources/Day03",
             swiftSettings: [.enableUpcomingFeature("BareSlashRegexLiterals")]
-        )          
+        ),
+        .executableTarget(
+            name: "Day04",
+            path: "Sources/Day04"),          
     ]
 )
