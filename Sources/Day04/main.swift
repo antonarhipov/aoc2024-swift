@@ -159,68 +159,31 @@ extension Array where Element == [Character] {
         let columns = self[0].count
         var count = 0
         
-        for i in 0..<rows {
-            for j in 0..<columns {
-                if self[i][j] == "X" {
-                    // check horizontal to the right
-                    if j + 3 < columns {
-                        let horizontal = String(self[i][j...j+3])
-                        if horizontal == xmas {
-                            count += 1
-                        }
-                    }
-                    // check horizontal to the left
-                    if j - 3 >= 0 {
-                        let horizontal = String(self[i][j-3...j])
-                        if horizontal == String(xmas.reversed()) {
-                            count += 1
-                        }
-                    }
-                    // check vertical down
-                    if i + 3 < rows {
-                        let vertical = String((0...3).map { self[i+$0][j] })
-                        if vertical == xmas {
-                            count += 1
-                        }
-                    }
-                    // check vertical up
-                    if i - 3 >= 0 {
-                        let vertical = String((0...3).map { self[i-$0][j] })
-                        if vertical == xmas {
-                            count += 1
-                        }
-                    }
-                    // check diagonal right down
-                    if i + 3 < rows && j + 3 < columns {
-                        let diagonal = String((0...3).map { self[i+$0][j+$0] })
-                        if diagonal == xmas {
-                            count += 1
-                        }
-                    }
-                    // check diagonal right up
-                    if i - 3 >= 0 && j + 3 < columns {
-                        let diagonal = String((0...3).map { self[i-$0][j+$0] })
-                        if diagonal == xmas {
-                            count += 1
-                        }
-                    }
-                    // check diagonal left down
-                    if i + 3 < rows && j - 3 >= 0 {
-                        let diagonal = String((0...3).map { self[i+$0][j-$0] })
-                        if diagonal == xmas {
-                            count += 1
-                        }
-                    }
-                    // check diagonal left up
-                    if i - 3 >= 0 && j - 3 >= 0 {
-                        let diagonal = String((0...3).map { self[i-$0][j-$0] })
-                        if diagonal == xmas {
-                            count += 1
-                        }
-                    }
+        let directions = [
+            (dx: 1, dy: 0),  // horizontal right
+            (dx: -1, dy: 0), // horizontal left
+            (dx: 0, dy: 1),  // vertical down
+            (dx: 0, dy: -1), // vertical up
+            (dx: 1, dy: 1),  // diagonal right down
+            (dx: -1, dy: 1), // diagonal right up
+            (dx: 1, dy: -1), // diagonal left down
+            (dx: -1, dy: -1) // diagonal left up
+        ]
+        
+        count = (0..<rows).flatMap { i in
+            (0..<columns).compactMap { j -> Int? in
+            guard self[i][j] == "X" else { return nil }
+            return directions.reduce(0) { acc, dir in
+                let xmasString = (0..<4).compactMap { k -> Character? in
+                let newRow = i + k * dir.dy
+                let newCol = j + k * dir.dx
+                guard newRow >= 0, newRow < rows, newCol >= 0, newCol < columns else { return nil }
+                return self[newRow][newCol]
                 }
+                return acc + (String(xmasString) == xmas ? 1 : 0)
             }
-        }
+            }
+        }.reduce(0, +)
         
         return count
     }
