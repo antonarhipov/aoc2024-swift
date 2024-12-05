@@ -38,32 +38,24 @@ func part1() -> Int {
 
         for page in update {
             print("Page: \(page)", terminator: " ")
-            let matchingRules = pageOrders.filter { rule in
-                rule.0 == page || rule.1 == page
-            }
+            let matchingRules = pageOrders.filter { $0.0 == page || $0.1 == page }
 
             print("Matching Rules: \(matchingRules)")
             for rule in matchingRules {
-                let position0 = update.firstIndex(of: rule.0)
-                let position1 = update.firstIndex(of: rule.1)
-                
-                print("Rule \(rule) is", terminator: " ")
-                if(position0 != nil && position1 != nil) {
-                    if position0! < position1! {
-                        print("valid: The position of \(rule.0) at \(position0!) comes before \(rule.1) at \(position1!)")
+                if let position0 = update.firstIndex(of: rule.0), let position1 = update.firstIndex(of: rule.1) {
+                    if position0 < position1 {
+                        print("valid: The position of \(rule.0) at \(position0) comes before \(rule.1) at \(position1)")
                     } else {
-                        print("NOT valid: The position of \(rule.0) at \(position0!) comes after \(rule.1) at \(position1!)")
+                        print("NOT valid: The position of \(rule.0) at \(position0) comes after \(position1)")
                         valid = false
                     }
                 } else {
                     print("is not applicable: One of the pages is not in the update list")
                 }
-
             }
         }
 
         if valid {
-            // find middle index in the update
             let middleIndex = update.count / 2
             total += update[middleIndex]
         }
