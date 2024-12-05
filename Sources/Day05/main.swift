@@ -63,8 +63,8 @@ func validate(update: [Int]) -> (Bool, (Int, Int)) {
         return nil
     }.first
 
-    if let invalidRule = invalidRule {
-        return (false, invalidRule)
+    if let rule = invalidRule {
+        return (false, rule)
     }
     return (true, (0, 0))
 }
