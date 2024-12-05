@@ -25,49 +25,57 @@ pageUpdates.forEach { pageUpdate in
     print(pageUpdate)
 }
 
+print("Solutions:")
 
+let part1 = pageUpdates.filter { update in 
+    validate(update: update).0
+}.reduce(0) { total, update in
+    let middleIndex = update.count / 2
+    return total + update[middleIndex]
+}
+print("Part 1: \(part1)")
 
-// Part 1
-print("\nPart1: \(part1())")
+let part2 = pageUpdates.filter { update in 
+    !validate(update: update).0
+}.map { update in
+    var tmpUpdate = update
+    var validationResult: (Bool, (Int, Int)) = validate(update: tmpUpdate)
 
-func part1() -> Int {
-    var total = 0
-    for update in pageUpdates {
-        print(update)
-        var valid = true
-
-        for page in update {
-            print("Page: \(page)", terminator: " ")
-            let matchingRules = pageOrders.filter { $0.0 == page || $0.1 == page }
-
-            print("Matching Rules: \(matchingRules)")
-            for rule in matchingRules {
-                if let position0 = update.firstIndex(of: rule.0), let position1 = update.firstIndex(of: rule.1) {
-                    if position0 < position1 {
-                        print("valid: The position of \(rule.0) at \(position0) comes before \(rule.1) at \(position1)")
-                    } else {
-                        print("NOT valid: The position of \(rule.0) at \(position0) comes after \(position1)")
-                        valid = false
-                    }
-                } else {
-                    print("is not applicable: One of the pages is not in the update list")
-                }
-            }
-        }
-
-        if valid {
-            let middleIndex = update.count / 2
-            total += update[middleIndex]
-        }
-
-        print("Update \(update) is \(valid ? "valid" : "NOT valid")")
+    while(validationResult.0 == false) {
+        tmpUpdate.swapAt(validationResult.1.0, validationResult.1.1)
+        validationResult = validate(update: tmpUpdate)
     }
-    return total
+
+    if validationResult.0 {
+        let middleIndex = tmpUpdate.count / 2
+        return tmpUpdate[middleIndex]
+    } else {
+        return 0
+    }
+}.reduce(0, +)
+print("Part 2: \(part2)")
+
+func validate(update: [Int]) -> (Bool, (Int, Int)) {
+    let invalidRule = pageOrders.compactMap { rule -> (Int, Int)? in
+        if let position0 = update.firstIndex(of: rule.0), let position1 = update.firstIndex(of: rule.1), position0 > position1 {
+            return (position0, position1)
+        }
+        return nil
+    }.first
+
+    if let invalidRule = invalidRule {
+        return (false, invalidRule)
+    }
+    return (true, (0, 0))
 }
 
-
-
-
-
-
-
+func validateSinglePage(page: Int, update: [Int]) -> Bool {
+    return pageOrders.filter { $0.0 == page || $0.1 == page }
+        .compactMap { rule in
+            if let position0 = update.firstIndex(of: rule.0), let position1 = update.firstIndex(of: rule.1) {
+                return position0 < position1
+            }
+            return nil
+        }
+        .contains(true)
+}
