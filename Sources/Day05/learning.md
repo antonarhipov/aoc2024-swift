@@ -18,3 +18,5 @@ if let position0 = update.firstIndex(of: rule.0), let position1 = update.firstIn
    return position0 < position1
 }
 ```            
+
+3. ?? - same as ?: in Kotlin

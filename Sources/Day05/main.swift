@@ -55,6 +55,20 @@ let part2 = pageUpdates.filter { update in
 }.reduce(0, +)
 print("Part 2: \(part2)")
 
+let part2_1 = pageUpdates.filter { update in 
+    !validate(update: update).0
+}.map { update in
+    var tmpUpdate = update
+    return sequence(first: validate(update: tmpUpdate)) { validationResult in
+        guard !validationResult.0 else { return nil }
+        tmpUpdate.swapAt(validationResult.1.0, validationResult.1.1)
+        return validate(update: tmpUpdate)
+    }
+    .reversed().first(where: { _ in true })
+    .map { _ in tmpUpdate[tmpUpdate.count / 2] } ?? 0
+}.reduce(0, +)
+print("Part 2 (alternative): \(part2_1)")
+
 func validate(update: [Int]) -> (Bool, (Int, Int)) {
     let invalidRule = pageOrders.compactMap { rule -> (Int, Int)? in
         if let position0 = update.firstIndex(of: rule.0), let position1 = update.firstIndex(of: rule.1), position0 > position1 {
