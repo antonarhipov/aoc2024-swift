@@ -18,11 +18,6 @@ struct Cell: Hashable {
         self.positionX = positionX
         self.positionY = positionY
     }
-
-    func hash(into hasher: inout Hasher) {
-             hasher.combine(positionX)
-             hasher.combine(positionY)
-   }
 }
 
 var path = [Cell]()
@@ -145,7 +140,7 @@ func move(position: (x: Int, y: Int), direction: Direction) -> ((x: Int, y: Int)
 
 
 // Part 2
-print("Part 2. Initial position: \(start.x),\(start.y) direction: \(direction.rawValue)")
+print("Part 2. Initial position: \(start.x),\(start.y), direction: \(direction.rawValue)")
 var visitedCells: Set<Cell> = Set<Cell>()
 matrix[start.y][start.x].direction = Direction(rawValue: matrix[start.y][start.x].value)!
 visitedCells.insert(matrix[start.y][start.x])
