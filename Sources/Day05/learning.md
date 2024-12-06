@@ -20,3 +20,14 @@ if let position0 = update.firstIndex(of: rule.0), let position1 = update.firstIn
 ```            
 
 3. ?? - same as ?: in Kotlin
+
+
+4. sequences:
+
+```
+return sequence(first: validate(update: tmpUpdate)) { validationResult in
+        guard !validationResult.0 else { return nil }
+        tmpUpdate.swapAt(validationResult.1.0, validationResult.1.1)
+        return validate(update: tmpUpdate)
+    }
+```    
