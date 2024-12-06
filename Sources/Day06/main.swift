@@ -5,85 +5,79 @@ let fileURL = URL(fileURLWithPath: "day06_input.txt")
 let fileContents = try String(contentsOf: fileURL, encoding: .utf8)
 let lines = fileContents.components(separatedBy: "\n")
 
-//directions
-let up: Character = "^"
-let down: Character = "v"
-let left: Character = "<"
-let right: Character = ">"
+// Directions
+enum Direction: Character {
+    case up = "^"
+    case down = "v"
+    case left = "<"
+    case right = ">"
+}
 
 let obstruction: Character = "#"
 
-let matrix = lines.map { line in
-    line.map { $0 }
-}
+// Create matrix from input lines
+let matrix = lines.map { Array($0) }
 
 let rows = matrix.count
 let columns = matrix[0].count
 print("Matrix: rows \(rows) columns \(columns)")
 
-var x = 0
-var y = 0
+var position = (x: 0, y: 0)
 var visited = Set<String>()
 
 // find the starting position
-for i in 0..<rows {
-    for j in 0..<columns {
-        if matrix[i][j] == "^" || matrix[i][j] == ">" || matrix[i][j] == "v" || matrix[i][j] == "<" {
-            x = j
-            y = i
-            break
-        }
+if let startPosition = matrix.enumerated().flatMap({ (i, row) in
+    row.enumerated().compactMap { (j, char) in
+        ["^", ">", "v", "<"].contains(char) ? (i, j) : nil
     }
+}).first {
+    position.y = startPosition.0
+    position.x = startPosition.1
 }
 
-var direction = matrix[y][x]
+var direction = Direction(rawValue: matrix[position.y][position.x])!
 
-visited.insert("\(x),\(y)")
-print("Initial position")
-print("\(x),\(y)")
+visited.insert("\(position.x),\(position.y)")
+print("Initial position: \(position.x),\(position.y)")
 
 while true {
-    // if we reach the edge of the matrix, exit
-    
-    if x == 0 && direction == left 
-    || x == columns-1 && direction == right
-    || y == 0 && direction == up
-    || y == rows-1 && direction == down {
+    // Check if we reach the edge of the matrix
+    if (position.x == 0 && direction == .left) ||
+       (position.x == columns - 1 && direction == .right) ||
+       (position.y == 0 && direction == .up) ||
+       (position.y == rows - 1 && direction == .down) {
         break
     }
 
-    // if the next cell is an obstruction, turn right
+    // Move or turn based on the direction and obstructions
     switch direction {
-        case up:
-            if matrix[y - 1][x] != obstruction {
-                y -= 1
+        case .up:
+            if matrix[position.y - 1][position.x] != obstruction {
+                position.y -= 1
             } else {
-                direction = right
+                direction = .right
             }
-        case down:
-            if matrix[y + 1][x] != obstruction {
-                y += 1
+        case .down:
+            if matrix[position.y + 1][position.x] != obstruction {
+                position.y += 1
             } else {
-                direction = left
+                direction = .left
             }
-        case left:
-            if matrix[y][x - 1] != obstruction {
-                x -= 1
+        case .left:
+            if matrix[position.y][position.x - 1] != obstruction {
+                position.x -= 1
             } else {
-                direction = up
+                direction = .up
             }
-        case right:
-            if matrix[y][x + 1] != obstruction {
-                x += 1
+        case .right:
+            if matrix[position.y][position.x + 1] != obstruction {
+                position.x += 1
             } else {
-                direction = down
+                direction = .down
             }
-        default:    
-            break
     }
-    
-    visited.insert("\(x),\(y)")
-    // print("\(x),\(y)")
+
+    visited.insert("\(position.x),\(position.y)")
 }
 
 print("Part 1: \(visited.count)")
