@@ -36,48 +36,70 @@ if let startPosition = matrix.enumerated().flatMap({ (i, row) in
 }
 
 var direction = Direction(rawValue: matrix[position.y][position.x])!
-
 visited.insert("\(position.x),\(position.y)")
 print("Initial position: \(position.x),\(position.y)")
+visited = traverse(position: position, direction: direction, visited: visited)
+print("Part 1: \(visited.count)")
 
-while true {
-    // Check if we reach the edge of the matrix
-    if (position.x == 0 && direction == .left) ||
-       (position.x == columns - 1 && direction == .right) ||
-       (position.y == 0 && direction == .up) ||
-       (position.y == rows - 1 && direction == .down) {
-        break
+func traverse(position: (x: Int, y: Int), direction: Direction, visited: Set<String>) -> Set<String> {
+    var newVisited = visited
+    var currentPosition = position
+    var currentDirection = direction
+
+    while true {
+        if isEdge(position: currentPosition, direction: currentDirection) {
+            break
+        }
+
+        let result = move(position: currentPosition, direction: currentDirection)
+        currentPosition = result.0
+        currentDirection = result.1
+
+        newVisited.insert("\(currentPosition.x),\(currentPosition.y)")
     }
 
-    // Move or turn based on the direction and obstructions
+    return newVisited
+}
+
+func isEdge(position: (x: Int, y: Int), direction: Direction) -> Bool {
+    return (position.x == 0 && direction == .left) ||
+           (position.x == columns - 1 && direction == .right) ||
+           (position.y == 0 && direction == .up) ||
+           (position.y == rows - 1 && direction == .down)
+}
+
+func move(position: (x: Int, y: Int), direction: Direction) -> ((x: Int, y: Int), Direction) {
+    var newPosition = position
+    var newDirection = direction
+
     switch direction {
         case .up:
             if matrix[position.y - 1][position.x] != obstruction {
-                position.y -= 1
+                newPosition.y -= 1
             } else {
-                direction = .right
+                newDirection = .right
             }
         case .down:
             if matrix[position.y + 1][position.x] != obstruction {
-                position.y += 1
+                newPosition.y += 1
             } else {
-                direction = .left
+                newDirection = .left
             }
         case .left:
             if matrix[position.y][position.x - 1] != obstruction {
-                position.x -= 1
+                newPosition.x -= 1
             } else {
-                direction = .up
+                newDirection = .up
             }
         case .right:
             if matrix[position.y][position.x + 1] != obstruction {
-                position.x += 1
+                newPosition.x += 1
             } else {
-                direction = .down
+                newDirection = .down
             }
     }
 
-    visited.insert("\(position.x),\(position.y)")
+    return (newPosition, newDirection)
 }
 
-print("Part 1: \(visited.count)")
+
