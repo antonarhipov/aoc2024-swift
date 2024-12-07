@@ -1,8 +1,8 @@
 import Foundation
 import Algorithms
 
-let fileURL = URL(fileURLWithPath: "day07_input.txt")
-// let fileURL = URL(fileURLWithPath: "day07_test.txt")
+// let fileURL = URL(fileURLWithPath: "day07_input.txt")
+let fileURL = URL(fileURLWithPath: "day07_test.txt")
 let fileContents = try String(contentsOf: fileURL, encoding: .utf8)
 
 struct Equation {
@@ -17,16 +17,29 @@ let equations = fileContents.split(separator: "\n").map {
     return Equation(left: left, right: right)
 }
 
-var total: Int64 = 0
+// Part 1
+print("Part 1 in progress...")
+var total1: Int64 = 0
 for equation in equations {
-    // generate all possible combinations of operators for this equation
-    print("Calculating for equation: \(equation.left) = \(equation.right)")
-    let operatorCombinations = generateOperatorCombinations(for: equation.right.count - 1)
-    total += operatorCombinations
+    let operatorCombinations = generateCombinations(for: ["+", "*"], by: equation.right.count - 1)
+    total1 += validateAndCalculate(for: equation, with: operatorCombinations)
+}
+print("Part 1: \(total1)")
+
+// Part 2
+print("Part 1 in progress...")
+var total2: Int64 = 0
+for equation in equations {
+    let operatorCombinations = generateCombinations(for: ["+", "*", "|"], by: equation.right.count - 1)
+    total2 += validateAndCalculate(for: equation, with: operatorCombinations)
+}
+print("Part 2: \(total2)")
+
+func validateAndCalculate(for equation: Equation, with operatorCombinations: [[Character]]) -> Int64 {
+    return operatorCombinations
         .map { combination in evaluateEquation(equation, with: combination) }
         .first { evaluationResult in evaluationResult.ok }? .result ?? 0
 }
-print("Part 1: \(total)")
 
 func evaluateEquation(_ equation: Equation, with operators: [Character]) -> (ok: Bool, result: Int64) {
         let left = Int(equation.left)!
@@ -38,14 +51,15 @@ func evaluateEquation(_ equation: Equation, with operators: [Character]) -> (ok:
                 evaluationResult += Int64(right[index+1])
             } else if operatorChar == "*" {
                 evaluationResult *= Int64(right[index+1])
+            } else if operatorChar == "|" {   
+                evaluationResult = Int64(String(evaluationResult) + String(right[index+1]))!
             }
         }
-        print("Equation: \(left) = \(right) -> \(evaluationResult) -> \(left == evaluationResult)")        
+        // print("Equation: \(left) = \(right) -> \(evaluationResult) -> \(left == evaluationResult)")        
         return (left == evaluationResult, evaluationResult)
 }
 
-func generateOperatorCombinations(for length: Int) -> [[Character]] {
-    let operators: [Character] = ["+", "*"]
+func generateCombinations(for operators: [Character], by length: Int) -> [[Character]] {
     var combinations: [[Character]] = []
     
     func generate(current: [Character]) {
@@ -62,4 +76,3 @@ func generateOperatorCombinations(for length: Int) -> [[Character]] {
     generate(current: [])
     return combinations
 }
-
