@@ -22,18 +22,13 @@ for equation in equations {
     // generate all possible combinations of operators for this equation
     print("Calculating for equation: \(equation.left) = \(equation.right)")
     let operatorCombinations = generateOperatorCombinations(for: equation.right.count - 1)
-    inner: for combination in operatorCombinations {
-        print("Combination: \(combination)")
-        let result = evaluateEquation(equation, with: combination)
-        if result.0 {
-            total += result.1
-            break inner;
-        }
-    }
+    total += operatorCombinations
+        .map { combination in evaluateEquation(equation, with: combination) }
+        .first { evaluationResult in evaluationResult.ok }? .result ?? 0
 }
 print("Part 1: \(total)")
 
-func evaluateEquation(_ equation: Equation, with operators: [Character]) -> (Bool, Int64) {
+func evaluateEquation(_ equation: Equation, with operators: [Character]) -> (ok: Bool, result: Int64) {
         let left = Int(equation.left)!
         let right = equation.right.map { Int($0)! }
         var evaluationResult: Int64 = Int64(right.first!)
@@ -45,8 +40,7 @@ func evaluateEquation(_ equation: Equation, with operators: [Character]) -> (Boo
                 evaluationResult *= Int64(right[index+1])
             }
         }
-        print("Equation: \(left) = \(right) -> \(evaluationResult) -> \(left == evaluationResult)")
-        
+        print("Equation: \(left) = \(right) -> \(evaluationResult) -> \(left == evaluationResult)")        
         return (left == evaluationResult, evaluationResult)
 }
 
