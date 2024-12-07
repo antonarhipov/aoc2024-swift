@@ -1,8 +1,8 @@
 import Foundation
 import Algorithms
 
-// let fileURL = URL(fileURLWithPath: "day07_input.txt")
-let fileURL = URL(fileURLWithPath: "day07_test.txt")
+let fileURL = URL(fileURLWithPath: "day07_input.txt")
+// let fileURL = URL(fileURLWithPath: "day07_test.txt")
 let fileContents = try String(contentsOf: fileURL, encoding: .utf8)
 
 struct Equation {
@@ -19,20 +19,27 @@ let equations = fileContents.split(separator: "\n").map {
 
 // Part 1
 print("Part 1 in progress...")
+var timer: ContinuousClock = ContinuousClock()
 var total1: Int64 = 0
-for equation in equations {
-    let operatorCombinations = generateCombinations(for: ["+", "*"], by: equation.right.count - 1)
-    total1 += validateAndCalculate(for: equation, with: operatorCombinations)
+let time1 = timer.measure { 
+    for equation in equations {
+        let operatorCombinations = generateCombinations(for: ["+", "*"], by: equation.right.count - 1)
+        total1 += validateAndCalculate(for: equation, with: operatorCombinations)
+    }
 }
+print("Time elapsed: \(time1)")
 print("Part 1: \(total1)")
 
 // Part 2
-print("Part 1 in progress...")
+print("Part 2 in progress...")
 var total2: Int64 = 0
-for equation in equations {
-    let operatorCombinations = generateCombinations(for: ["+", "*", "|"], by: equation.right.count - 1)
-    total2 += validateAndCalculate(for: equation, with: operatorCombinations)
+let time2 = timer.measure { 
+    for equation in equations {
+        let operatorCombinations = generateCombinations(for: ["+", "*", "|"], by: equation.right.count - 1)
+        total2 += validateAndCalculate(for: equation, with: operatorCombinations)
+    }
 }
+print("Time elapsed: \(time2)")
 print("Part 2: \(total2)")
 
 func validateAndCalculate(for equation: Equation, with operatorCombinations: [[Character]]) -> Int64 {
