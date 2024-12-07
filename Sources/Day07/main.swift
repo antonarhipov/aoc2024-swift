@@ -10,10 +10,10 @@ struct Equation {
     var right: [String]
 }
 
-let equations = fileContents.split(separator: "\n").map { 
-    let parts = $0.split(separator: ":") 
+let equations = fileContents.split(separator: "\n").map {
+    let parts = $0.split(separator: ":")
     let left: String = parts[0].trimmingCharacters(in: .whitespaces)
-    let right = parts[1].trimmingCharacters(in: .whitespaces).components(separatedBy: " ")    
+    let right = parts[1].trimmingCharacters(in: .whitespaces).components(separatedBy: " ")
     return Equation(left: left, right: right)
 }
 
@@ -21,7 +21,7 @@ let equations = fileContents.split(separator: "\n").map {
 print("Part 1 in progress...")
 var timer: ContinuousClock = ContinuousClock()
 var total1: Int64 = 0
-let time1 = timer.measure { 
+let time1 = timer.measure {
     for equation in equations {
         let operatorCombinations = generateCombinations(for: ["+", "*"], by: equation.right.count - 1)
         total1 += validateAndCalculate(for: equation, with: operatorCombinations)
@@ -33,7 +33,7 @@ print("Part 1: \(total1)")
 // Part 2
 print("Part 2 in progress...")
 var total2: Int64 = 0
-let time2 = timer.measure { 
+let time2 = timer.measure {
     for equation in equations {
         let operatorCombinations = generateCombinations(for: ["+", "*", "|"], by: equation.right.count - 1)
         total2 += validateAndCalculate(for: equation, with: operatorCombinations)
@@ -58,28 +58,28 @@ func evaluateEquation(_ equation: Equation, with operators: [Character]) -> (ok:
                 evaluationResult += Int64(right[index+1])
             } else if operatorChar == "*" {
                 evaluationResult *= Int64(right[index+1])
-            } else if operatorChar == "|" {   
+            } else if operatorChar == "|" {
                 evaluationResult = Int64(String(evaluationResult) + String(right[index+1]))!
             }
         }
-        // print("Equation: \(left) = \(right) -> \(evaluationResult) -> \(left == evaluationResult)")        
+        // print("Equation: \(left) = \(right) -> \(evaluationResult) -> \(left == evaluationResult)")
         return (left == evaluationResult, evaluationResult)
 }
 
 func generateCombinations(for operators: [Character], by length: Int) -> [[Character]] {
     var combinations: [[Character]] = []
-    
+
     func generate(current: [Character]) {
         if current.count == length {
             combinations.append(current)
             return
         }
-        
+
         for op in operators {
             generate(current: current + [op])
         }
     }
-    
+
     generate(current: [])
     return combinations
 }
