@@ -19,6 +19,9 @@ let package = Package(
         // .executableTarget(
             // name: "aoc2024"),
         .executableTarget(
+            name: "Learning",
+            path: "Sources/Learning"),   
+        .executableTarget(
             name: "Day01",
             path: "Sources/Day01"),
         .executableTarget(
@@ -47,5 +50,11 @@ let package = Package(
                 .product(name: "Algorithms", package: "swift-algorithms")
             ],
             path: "Sources/Day07"),
+        .executableTarget(
+            name: "Day08",
+            dependencies: [
+                .product(name: "Algorithms", package: "swift-algorithms")
+            ],
+            path: "Sources/Day08"),    
     ]
 )
