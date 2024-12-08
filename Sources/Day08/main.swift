@@ -18,7 +18,6 @@ var matrixCopy = matrix
 
 var layers: [Character : [[Substring.Element]]] = [:]
 var markedSymols: [Character] = []
-var counter = 0
 
 matrix.enumerated().forEach { (i, row) in
     row.enumerated().forEach { (j, cell) in
@@ -41,15 +40,14 @@ matrix.enumerated().forEach { (i, row) in
 }
 
 // print matrix
-for row in matrixCopy {
-    for cell in row {
-        print(cell, terminator: "")     
-        if(cell == "#") {
-            counter += 1
-        }
+matrixCopy.forEach { row in
+    row.forEach { cell in
+        print(cell, terminator: "")
     }
     print()
 }
+
+let counter = matrixCopy.flatMap { $0 }.filter { $0 == "#" }.count
 print("Counter: \(counter)")
 
 func updateMatrixIfPossible(_ currentSymbol: Character, _ y: Int, _ x: Int) {
