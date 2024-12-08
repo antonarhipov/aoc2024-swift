@@ -15,8 +15,6 @@ let matrix = lines.map { line in
 }
 
 var matrixCopy = matrix
-
-var layers: [Character : [[Substring.Element]]] = [:]
 var markedSymols: [Character] = []
 
 matrix.enumerated().forEach { (i, row) in
