@@ -1,8 +1,8 @@
 import Foundation
 import RegexBuilder
 
-// let fileURL = URL(fileURLWithPath: "day09_test.txt")
-let fileURL = URL(fileURLWithPath: "day09_input.txt")
+let fileURL = URL(fileURLWithPath: "day09_test.txt")
+// let fileURL = URL(fileURLWithPath: "day09_input.txt")
 
 protocol Block {}
 
@@ -35,7 +35,6 @@ var space = numbers.enumerated().map { (offset, element) in
 
 print("Mapping complete: \(space.count)")
 
-var counter = 0
 var dotIndices = space.indices.filter { space[$0] == "." }
 var numberIndices = space.indices.filter { space[$0].isNumber }
 
@@ -47,11 +46,6 @@ while !validateSpace(space) {
     
     space.replaceSubrange(firstDot...firstDot, with: [c])
     space.replaceSubrange(lastNumber...lastNumber, with: ["."])
-    
-    counter += 1
-    if counter % 1000 == 0 {
-        print(".")
-    }
 }
 
 print("Calculating checksum...")
@@ -61,7 +55,7 @@ let checksum = space.enumerated().reduce(0) { result, element in
         return result
     }
     let x = index * Int(String(value))!
-    print("Calculating: [\(result)] + \(index) * \(value) = \(result + x)")
+    print("[\(result)] + \(index) * \(value) = \(result + x)")
     return result + x
 }
 print("Part 1: \(checksum)") // FIXME: This is not the correct answer (works for test input)
