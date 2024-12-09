@@ -48,7 +48,8 @@ func calculateChecksum(from blocks: [Int?]) -> Int {
     }
 }
 
-let fileContents = try readFileContents(from: "day09_input.txt")
+let fileContents = try readFileContents(from: "day09_test.txt")
+// let fileContents = try readFileContents(from: "day09_input.txt")
 var blocks = parseBlocks(from: fileContents)
 defragmentBlocks(&blocks)
 let checksum = calculateChecksum(from: blocks)
