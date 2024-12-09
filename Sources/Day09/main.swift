@@ -1,73 +1,55 @@
 import Foundation
-import RegexBuilder
 
-let fileURL = URL(fileURLWithPath: "day09_test.txt")
-// let fileURL = URL(fileURLWithPath: "day09_input.txt")
-
-protocol Block {}
-
-struct File: Block {
-    var id: Int
-    var value: Int
+func readFileContents(from fileName: String) throws -> String {
+    let fileURL = URL(fileURLWithPath: fileName)
+    return try String(contentsOf: fileURL, encoding: .utf8)
 }
 
-struct FreeSpace: Block {
-    var value: Int
-}
-
-let fileContents = try String(contentsOf: fileURL, encoding: .utf8)
-print(fileContents)
-print("--------------------")
-let numbers = Array(fileContents).compactMap { Int(String($0)) }
-
-print("Part 1 in progress...")
-
-var space = numbers.enumerated().map { (offset, element) in
-    offset % 2 == 0 ? File(id: offset / 2, value: element) as Block : FreeSpace(value: element) as Block
-}.flatMap { block -> [String] in
-    if let file = block as? File {
-        return Array(repeating: "\(file.id)", count: file.value)
-    } else if let freeSpace = block as? FreeSpace {
-        return Array(repeating: ".", count: freeSpace.value)
-    }
-    return []
-}.joined()
-
-print("Mapping complete: \(space.count)")
-
-var dotIndices = space.indices.filter { space[$0] == "." }
-var numberIndices = space.indices.filter { space[$0].isNumber }
-
-print("Defragmenting...")
-while !validateSpace(space) {
-    let firstDot = dotIndices.removeFirst()
-    let lastNumber = numberIndices.removeLast()
-    let c = space[lastNumber]
-    
-    space.replaceSubrange(firstDot...firstDot, with: [c])
-    space.replaceSubrange(lastNumber...lastNumber, with: ["."])
-}
-
-print("Calculating checksum...")
-let checksum = space.enumerated().reduce(0) { result, element in
-    let (index, value) = element
-    if value == "." {
-        return result
-    }
-    let x = index * Int(String(value))!
-    print("[\(result)] + \(index) * \(value) = \(result + x)")
-    return result + x
-}
-print("Part 1: \(checksum)") // FIXME: This is not the correct answer (works for test input)
-
-func validateSpace(_ space: String) -> Bool {
-    var foundDot = false
-    for char in space {
-        if char == "." {
-            foundDot = true
-        } else if foundDot && char.isNumber {
-            return false
+func parseBlocks(from fileContents: String) -> [Int?] {
+    return fileContents.enumerated().flatMap { (index, char) -> [Int?] in
+        let length = Int(String(char))!
+        if index % 2 == 0 {
+            let fileId = index / 2
+            return Array(repeating: fileId, count: length)
+        } else {
+            return Array(repeating: nil, count: length)
         }
     }
-    return foundDot
 }
+
+func defragmentBlocks(_ blocks: inout [Int?]) {
+    var position = 0
+    while position < blocks.count {
+        if blocks[position] == nil {
+            var foundFile = false
+            for i in (position + 1..<blocks.count).reversed() {
+                if let fileId = blocks[i] {
+                    blocks[position] = fileId
+                    blocks[i] = nil
+                    foundFile = true
+                    break
+                }
+            }
+            if !foundFile {
+                break
+            }
+        }
+        position += 1
+    }
+}
+
+func calculateChecksum(from blocks: [Int?]) -> Int {
+    return blocks.enumerated().reduce(0) { (sum, element) in
+        let (position, block) = element
+        if let fileId = block {
+            return sum + position * fileId
+        }
+        return sum
+    }
+}
+
+let fileContents = try readFileContents(from: "day09_input.txt")
+var blocks = parseBlocks(from: fileContents)
+defragmentBlocks(&blocks)
+let checksum = calculateChecksum(from: blocks)
+print("Part 1: \(checksum)")
