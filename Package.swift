@@ -62,5 +62,11 @@ let package = Package(
                 .product(name: "Algorithms", package: "swift-algorithms")
             ],
             path: "Sources/Day09"),
+        .executableTarget(
+            name: "Day10",
+            dependencies: [
+                .product(name: "Algorithms", package: "swift-algorithms")
+            ],
+            path: "Sources/Day10"),    
     ]
 )
