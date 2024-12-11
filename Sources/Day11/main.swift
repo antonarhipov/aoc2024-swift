@@ -4,29 +4,46 @@ import Foundation
 let input = "64554 35 906 6 6960985 5755 975820 0"
 var stones = input.split(separator: " ").map { Int($0)! }
 
+var cache = [Int: [Int]]()
+var evaluationsCount = 0
+var cacheHits = 0
+
 // Part 1
 print(stones.map { String($0) }.joined(separator: " "))
-for i in 0..<25 {
+for i in 0..<75 {
     stones = evaluate(stones)
-    print("\(i): \(stones.count)")
+    print("\(i): \(stones.count), cache hits: \(cacheHits), evaluations: \(evaluationsCount)")
 }
 print("Part 1: \(stones.count)")
+print("Evaluations: \(evaluationsCount)")
+print("Cache hits: \(cacheHits)")
 
 
 func evaluate(_ stones: [Int]) -> [Int] {
     var result: [Int] = []
     for stone in stones {
-        if stone == 0 {
-            result.append(1)
-        } else if isEvenDigitCount(stone) {
-            let (left, right) = splitNumber(stone)
-            result.append(left)
-            result.append(right)
+        if let cached = cache[stone] {
+            cacheHits += 1
+            result.append(contentsOf: cached)
         } else {
-            result.append(stone * 2024)
+            let evaluated = evaluateStone(stone: stone)
+            cache[stone] = evaluated
+            result.append(contentsOf: evaluated)
         }
     }
     return result
+}
+
+func evaluateStone(stone: Int) -> [Int] {
+    evaluationsCount += 1
+    if stone == 0 {
+        return [1]
+    } else if isEvenDigitCount(stone) {
+        let (left, right) = splitNumber(stone)
+        return [left, right]
+    } else {
+        return [stone * 2024]
+    }
 }
 
 func isEvenDigitCount(_ number: Int) -> Bool {
