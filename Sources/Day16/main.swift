@@ -29,11 +29,16 @@ struct Position: Hashable {
     let y: Int
 }
 
-// Efficient Priority Queue implementation
 struct PriorityQueue<T> {
+    // The queue stores elements of type `T` associated with priority `Int`.
     private var heap: [(priority: Int, item: T)]
+    
+    // The comparison function for ordering elements in the queue.
     private let order: (Int, Int) -> Bool
     
+    
+    //   `@escaping` annotation is required because the closure is stored in a property 
+    //   and will be called after the initializer completes, escaping the scope of the initializer.
     init(order: @escaping (Int, Int) -> Bool) {
         self.heap = []
         self.order = order
@@ -43,7 +48,7 @@ struct PriorityQueue<T> {
     
     mutating func push(_ item: T, priority: Int) {
         heap.append((priority, item))
-        siftUp(from: heap.count - 1)
+        moveUp(from: heap.count - 1)
     }
     
     mutating func pop() -> (T, Int)? {
@@ -52,12 +57,12 @@ struct PriorityQueue<T> {
         heap[0] = heap[heap.count - 1]
         heap.removeLast()
         if !heap.isEmpty {
-            siftDown(from: 0)
+            moveDown(from: 0)
         }
         return (result.item, result.priority)
     }
     
-    private mutating func siftUp(from index: Int) {
+    private mutating func moveUp(from index: Int) {
         var child = index
         var parent = (child - 1) / 2
         while child > 0 && order(heap[child].priority, heap[parent].priority) {
@@ -67,7 +72,7 @@ struct PriorityQueue<T> {
         }
     }
     
-    private mutating func siftDown(from index: Int) {
+    private mutating func moveDown(from index: Int) {
         var parent = index
         while true {
             let leftChild = 2 * parent + 1
@@ -89,22 +94,29 @@ struct PriorityQueue<T> {
     }
 }
 
-func findOptimalPaths(in maze: [[Character]]) -> (minCost: Int, optimalTiles: Int) {
-    let height = maze.count
-    let width = maze[0].count
+func findStartAndEnd(in maze: [[Character]]) -> (start: Position, end: Position) {
+    var start: Position?
+    var end: Position?
     
-    var start: (x: Int, y: Int)?
-    var end: (x: Int, y: Int)?
-    
-    // Find start and end positions
-    for y in 0..<height {
-        for x in 0..<width {
-            if maze[y][x] == "S" { start = (x, y) }
-            if maze[y][x] == "E" { end = (x, y) }
+    for y in 0..<maze.count {
+        for x in 0..<maze[y].count {
+            if maze[y][x] == "S" {
+                start = Position(x: x, y: y)
+            } else if maze[y][x] == "E" {
+                end = Position(x: x, y: y)
+            }
         }
     }
     
-    guard let start = start, let end = end else { return (-1, 0) }
+    return (start!, end!)
+}
+
+func findOptimalPaths(in maze: [[Character]]) -> (minCost: Int, optimalTiles: Int) {
+    let height = maze.count
+    let width = maze[0].count
+    print("Height:", height, "Width:", width)
+    
+    let (start, end) = findStartAndEnd(in: maze)
     
     var pq = PriorityQueue<(state: State, path: [Position])> { $0 < $1 }
     var visited = [State: (cost: Int, paths: [[Position]])]()
@@ -236,6 +248,13 @@ print("Cost:", cost2, "Tiles:", tiles2)
 let input = try! String(contentsOfFile: "day16_input.txt", encoding: .utf8)
 let maze = input.split(separator: "\n").map { Array($0) }
 let (minCost, optimalTiles) = findOptimalPaths(in: maze)
-print("Part 1 - Minimum cost:", minCost)
+print("\nPart 1 - Minimum cost:", minCost)
 print("Part 2 - Number of optimal tiles:", optimalTiles)
 
+
+// Test 1:
+// Cost: 7036 Tiles: 45
+// Test 2:
+// Cost: 11048 Tiles: 64
+// Part 1 - Minimum cost: 102488
+// Part 2 - Number of optimal tiles: 559
