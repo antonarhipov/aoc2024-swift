@@ -1,8 +1,16 @@
 import Foundation
 
-enum Direction: Int, CaseIterable {
+enum Direction: Int {
     case north = 0, east, south, west
-    
+
+    // 0 -> turn(clockwise) -> 1       0 + 1 % 4 = 1
+    // 1 -> turn(clockwise) -> 2       1 + 1 % 4 = 2
+    // 2 -> turn(clockwise) -> 3       2 + 1 % 4 = 3
+    // 3 -> turn(clockwise) -> 0       3 + 1 % 4 = 0
+    // 0 -> turn(!clockwise) -> 3      0 + 3 % 4 = 3
+    // 3 -> turn(!clockwise) -> 2      3 + 3 % 4 = 2
+    // 2 -> turn(!clockwise) -> 1      2 + 3 % 4 = 1
+    // 1 -> turn(!clockwise) -> 0      1 + 3 % 4 = 0
     func turn(_ clockwise: Bool) -> Direction {
         let newRawValue = (self.rawValue + (clockwise ? 1 : 3)) % 4
         return Direction(rawValue: newRawValue)!
