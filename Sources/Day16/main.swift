@@ -1,19 +1,11 @@
 import Foundation
 
-enum Direction: CaseIterable {
-    case north, east, south, west
+enum Direction: Int, CaseIterable {
+    case north = 0, east, south, west
     
     func turn(_ clockwise: Bool) -> Direction {
-        switch (self, clockwise) {
-            case (.north, true): return .east
-            case (.east, true): return .south
-            case (.south, true): return .west
-            case (.west, true): return .north
-            case (.north, false): return .west
-            case (.east, false): return .north
-            case (.south, false): return .east
-            case (.west, false): return .south
-        }
+        let newRawValue = (self.rawValue + (clockwise ? 1 : 3)) % 4
+        return Direction(rawValue: newRawValue)!
     }
     
     var movement: (dx: Int, dy: Int) {
@@ -32,16 +24,72 @@ struct State: Hashable {
     let direction: Direction
 }
 
-struct PriorityQueueElement: Comparable {
-    let state: State
-    let cost: Int
+struct Position: Hashable {
+    let x: Int
+    let y: Int
+}
+
+// Efficient Priority Queue implementation
+struct PriorityQueue<T> {
+    private var heap: [(priority: Int, item: T)]
+    private let order: (Int, Int) -> Bool
     
-    static func < (lhs: PriorityQueueElement, rhs: PriorityQueueElement) -> Bool {
-        lhs.cost < rhs.cost
+    init(order: @escaping (Int, Int) -> Bool) {
+        self.heap = []
+        self.order = order
+    }
+    
+    var isEmpty: Bool { heap.isEmpty }
+    
+    mutating func push(_ item: T, priority: Int) {
+        heap.append((priority, item))
+        siftUp(from: heap.count - 1)
+    }
+    
+    mutating func pop() -> (T, Int)? {
+        guard !heap.isEmpty else { return nil }
+        let result = heap[0]
+        heap[0] = heap[heap.count - 1]
+        heap.removeLast()
+        if !heap.isEmpty {
+            siftDown(from: 0)
+        }
+        return (result.item, result.priority)
+    }
+    
+    private mutating func siftUp(from index: Int) {
+        var child = index
+        var parent = (child - 1) / 2
+        while child > 0 && order(heap[child].priority, heap[parent].priority) {
+            heap.swapAt(child, parent)
+            child = parent
+            parent = (child - 1) / 2
+        }
+    }
+    
+    private mutating func siftDown(from index: Int) {
+        var parent = index
+        while true {
+            let leftChild = 2 * parent + 1
+            let rightChild = leftChild + 1
+            var candidate = parent
+            
+            if leftChild < heap.count && order(heap[leftChild].priority, heap[candidate].priority) {
+                candidate = leftChild
+            }
+            if rightChild < heap.count && order(heap[rightChild].priority, heap[candidate].priority) {
+                candidate = rightChild
+            }
+            if candidate == parent {
+                return
+            }
+            heap.swapAt(parent, candidate)
+            parent = candidate
+        }
     }
 }
 
-func findShortestPath(in maze: [[Character]]) -> Int {
+func findOptimalPaths(in maze: [[Character]]) -> (minCost: Int, optimalTiles: Int) {
     let height = maze.count
     let width = maze[0].count
     
@@ -56,50 +104,138 @@ func findShortestPath(in maze: [[Character]]) -> Int {
         }
     }
     
-    guard let start = start, let end = end else { return -1 }
+    guard let start = start, let end = end else { return (-1, 0) }
     
-    var priorityQueue = [PriorityQueueElement(state: State(x: start.x, y: start.y, direction: .east), cost: 0)]
-    var visited = Set<State>()
+    var pq = PriorityQueue<(state: State, path: [Position])> { $0 < $1 }
+    var visited = [State: (cost: Int, paths: [[Position]])]()
+    var minEndCost = Int.max
+    var optimalPaths = Set<Position>()
     
-    while !priorityQueue.isEmpty {
-        priorityQueue.sort()  // Keep queue sorted by cost
-        let current = priorityQueue.removeFirst()
+    let startState = State(x: start.x, y: start.y, direction: .east)
+    pq.push((state: startState, path: [Position(x: start.x, y: start.y)]), priority: 0)
+    visited[startState] = (0, [[Position(x: start.x, y: start.y)]])
+    
+    while let ((current, path), cost) = pq.pop() {
+        if cost > minEndCost { continue }
         
-        if current.state.x == end.x && current.state.y == end.y {
-            return current.cost
-        }
-        
-        if visited.contains(current.state) {
+        if current.x == end.x && current.y == end.y {
+            if cost < minEndCost {
+                minEndCost = cost
+                optimalPaths = Set(path)
+            } else if cost == minEndCost {
+                optimalPaths.formUnion(path)
+            }
             continue
         }
-        visited.insert(current.state)
+        
+        if let prevVisit = visited[current], prevVisit.cost < cost { continue }
         
         // Try moving forward
-        let nextX = current.state.x + current.state.direction.movement.dx
-        let nextY = current.state.y + current.state.direction.movement.dy
+        let nextX = current.x + current.direction.movement.dx
+        let nextY = current.y + current.direction.movement.dy
         
         if nextX >= 0 && nextX < width && nextY >= 0 && nextY < height && maze[nextY][nextX] != "#" {
-            let nextState = State(x: nextX, y: nextY, direction: current.state.direction)
-            if !visited.contains(nextState) {
-                priorityQueue.append(PriorityQueueElement(state: nextState, cost: current.cost + 1))
+            let nextState = State(x: nextX, y: nextY, direction: current.direction)
+            let newCost = cost + 1
+            let newPath = path + [Position(x: nextX, y: nextY)]
+            
+            if visited[nextState]?.cost == nil || visited[nextState]!.cost >= newCost {
+                if visited[nextState]?.cost == newCost {
+                    visited[nextState]!.paths.append(newPath)
+                } else {
+                    visited[nextState] = (newCost, [newPath])
+                }
+                pq.push((state: nextState, path: newPath), priority: newCost)
             }
         }
         
-        // Try turning clockwise and counterclockwise
+        // Try turning
         for clockwise in [true, false] {
-            let nextDirection = current.state.direction.turn(clockwise)
-            let nextState = State(x: current.state.x, y: current.state.y, direction: nextDirection)
-            if !visited.contains(nextState) {
-                priorityQueue.append(PriorityQueueElement(state: nextState, cost: current.cost + 1000))
+            let nextDirection = current.direction.turn(clockwise)
+            let nextState = State(x: current.x, y: current.y, direction: nextDirection)
+            let newCost = cost + 1000
+            
+            if visited[nextState]?.cost == nil || visited[nextState]!.cost >= newCost {
+                if visited[nextState]?.cost == newCost {
+                    visited[nextState]!.paths.append(path)
+                } else {
+                    visited[nextState] = (newCost, [path])
+                }
+                pq.push((state: nextState, path: path), priority: newCost)
             }
         }
     }
     
-    return -1
+    return (minEndCost, optimalPaths.count)
+}
+
+func printMaze(_ maze: [[Character]], optimalTiles: Set<Position>) {
+    for y in 0..<maze.count {
+        for x in 0..<maze[0].count {
+            if maze[y][x] == "#" {
+                print("#", terminator: "")
+            } else if optimalTiles.contains(Position(x: x, y: y)) {
+                print("O", terminator: "")
+            } else {
+                print(".", terminator: "")
+            }
+        }
+        print()
+    }
 }
 
 
+let test1 = """
+###############
+#.......#....E#
+#.#.###.#.###.#
+#.....#.#...#.#
+#.###.#####.#.#
+#.#.#.......#.#
+#.#.#####.###.#
+#...........#.#
+###.#.#####.#.#
+#...#.....#.#.#
+#.#.#.###.#.#.#
+#.....#...#.#.#
+#.###.#.#.#.#.#
+#S..#.....#...#
+###############
+"""
+    
+let test2 = """
+#################
+#...#...#...#..E#
+#.#.#.#.#.#.#.#.#
+#.#.#.#...#...#.#
+#.#.#.#.###.#.#.#
+#...#.#.#.....#.#
+#.#.#.#.#.#####.#
+#.#...#.#.#.....#
+#.#.#####.#.###.#
+#.#.#.......#...#
+#.#.###.#####.###
+#.#.#...#.....#.#
+#.#.#.#####.###.#
+#.#.#.........#.#
+#.#.#.#########.#
+#S#.............#
+#################
+"""
+    
+print("Test 1:")
+let maze1 = test1.split(separator: "\n").map { Array($0) }
+let (cost1, tiles1) = findOptimalPaths(in: maze1)
+print("Cost:", cost1, "Tiles:", tiles1)
+
+print("\nTest 2:")
+let maze2 = test2.split(separator: "\n").map { Array($0) }
+let (cost2, tiles2) = findOptimalPaths(in: maze2)
+print("Cost:", cost2, "Tiles:", tiles2)
+
 let input = try! String(contentsOfFile: "day16_input.txt", encoding: .utf8)
 let maze = input.split(separator: "\n").map { Array($0) }
-let result = findShortestPath(in: maze)
-print("Result:", result)
+let (minCost, optimalTiles) = findOptimalPaths(in: maze)
+print("Part 1 - Minimum cost:", minCost)
+print("Part 2 - Number of optimal tiles:", optimalTiles)
+
