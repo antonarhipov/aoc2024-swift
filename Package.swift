@@ -82,9 +82,12 @@ let package = Package(
             path: "Sources/Day12"), 
          .executableTarget(
             name: "Day16",
-            dependencies: [
-                .product(name: "Algorithms", package: "swift-algorithms")
-            ],
-            path: "Sources/Day16"),           
+            path: "Sources/Day16"),
+         .executableTarget(
+            name: "Day17",
+            path: "Sources/Day17"),
+         .executableTarget(
+            name: "Day18",
+            path: "Sources/Day18"),                         
     ]
 )
