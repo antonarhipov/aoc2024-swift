@@ -17,10 +17,13 @@ print("Available patterns: \(patterns)")
 let designs = lines[1...].map { $0 }
 print("Designs to check: \(designs)")
 
+
 let solver = Solver(patterns: patterns)
 var possibleCount = 0
 var impossibleCount = 0
 
+// Part 1
+print("Part 1:")
 for design in designs {
     let canMake = solver.canCompose(design)
     if canMake {
@@ -28,17 +31,25 @@ for design in designs {
     } else {
         impossibleCount += 1
     }
-    print("\(design): \(canMake ? "can be made" : "is impossible")")
 }
 
 print("Found \(possibleCount) designs that can be made using the available patterns")
 print("\(impossibleCount) designs that cannot be made using the available patterns")
 
+// Part 2
+print("\nPart 2:")
+var totalWays = 0
+for design in designs {
+    let ways = solver.countWays(design)
+    totalWays += ways
+}
 
+print("Total number of different ways to make all designs: \(totalWays)")
 
 class Solver {
     let patterns: [String]
     var cache: [String: Bool] = [:]
+    var waysCache: [String: Int] = [:]
     
     init(patterns: [String]) {
         self.patterns = patterns
@@ -69,5 +80,31 @@ class Solver {
         // If no pattern works, this design cannot be made
         cache[design] = false
         return false
+    }
+
+
+    func countWays(_ design: String) -> Int {
+        // Check cache first
+        if let cached = waysCache[design] {
+            return cached
+        }
+        
+        // Base cases
+        if design.isEmpty {
+            return 1  // Empty string can be made in exactly one way
+        }
+        
+        var totalWays = 0
+        
+        // Try each pattern at the start
+        for pattern in patterns {
+            if design.hasPrefix(pattern) {
+                let remaining = String(design.dropFirst(pattern.count))
+                totalWays += countWays(remaining)
+            }
+        }
+        
+        waysCache[design] = totalWays
+        return totalWays
     }
 }
