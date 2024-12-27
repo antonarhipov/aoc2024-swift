@@ -32,6 +32,8 @@ for design in designs {
         impossibleCount += 1
     }
 }
+//cache stats
+print("Cache hits: \(solver.cacheHits), misses: \(solver.cacheMisses), invocations: \(solver.invocations)")
 
 print("Found \(possibleCount) designs that can be made using the available patterns")
 print("\(impossibleCount) designs that cannot be made using the available patterns")
@@ -50,17 +52,23 @@ class Solver {
     let patterns: [String]
     var cache: [String: Bool] = [:]
     var waysCache: [String: Int] = [:]
+    var cacheHits = 0
+    var cacheMisses = 0
+    var invocations = 0
     
     init(patterns: [String]) {
         self.patterns = patterns
     }
     
     func canCompose(_ design: String) -> Bool {
+        invocations += 1
         //Check cache first
         if let cached = cache[design] {
+            cacheHits += 1
             return cached
         }
         
+        cacheMisses += 1
         // Base cases
         if design.isEmpty {
             return true
